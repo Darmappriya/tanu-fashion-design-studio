@@ -1,0 +1,9 @@
+{
+  "name": "TANU FASHION DESIGN STUDIO",
+  "short_name": "TANU STUDIO",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#111216",
+  "theme_color": "#171717",
+  "icons": []
+}

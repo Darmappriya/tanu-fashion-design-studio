@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="si">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#171717"><title>TANU FASHION DESIGN STUDIO</title>
+<link rel="manifest" href="manifest.webmanifest">
+<style>
+*{box-sizing:border-box}body{margin:0;background:#111216;color:#fff;font-family:system-ui,sans-serif}
+main{max-width:760px;margin:auto;padding:16px}header{text-align:center;padding:18px}
+header b{color:#e9bd59;letter-spacing:4px}h1{font-size:24px;margin:8px}
+p{color:#b9bbc2}.card{background:#202229;border:1px solid #393c45;border-radius:16px;padding:16px;margin:13px 0}
+h2{font-size:17px;margin:0 0 12px}.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}
+button,.upload{background:#2c3039;color:white;border:1px solid #50545f;border-radius:11px;padding:12px;font-weight:650}
+button{cursor:pointer}.selected{border-color:#e9bd59;background:#514321;color:#ffe6a5}
+.upload{display:block;text-align:center;border-style:dashed;padding:20px}input{display:none}
+.preview{display:none;width:100%;max-height:260px;object-fit:contain;margin-top:12px}
+.primary{width:100%;background:#e9bd59;color:#17120a;border:0;font-size:16px;padding:15px}
+.hint{font-size:12px;line-height:1.5}.status{font-size:14px;white-space:pre-wrap;line-height:1.5}
+.result{display:none;width:100%;border-radius:12px;margin:10px 0;background:#111;object-fit:contain}
+.resultWrap{display:grid;grid-template-columns:1fr;gap:12px}.resultBox{background:#17191f;border:1px solid #393c45;padding:12px;border-radius:12px}
+.resultBox h3{font-size:14px;margin:0 0 8px}.download{display:inline-block;color:#f2ce79;margin:6px 0}
+footer{text-align:center;color:#999;font-size:11px;padding:20px}
+@media(min-width:620px){.resultWrap{grid-template-columns:1fr 1fr}}
+</style></head>
+<body><main>
+<header><b>TANU FASHION</b><h1>DESIGN STUDIO</h1><p>ඔයාගේ T-shirt Design වැඩ එකම තැනකින්</p></header>
+<section class="card"><h2>01 · Design Photo Upload</h2>
+<label class="upload" for="photo">＋ Photo එක තෝරන්න<input id="photo" type="file" accept="image/png,image/jpeg,image/webp"></label>
+<img id="preview" class="preview" alt="Uploaded design preview">
+<p class="hint">පැහැදිලි, හොඳ resolution එකක් ඇති design photo එකක් තෝරන්න. AI එකට text සහ artwork එක 100% නිවැරදිව තබාගැනීම හැමවිටම සහතික කළ නොහැක.</p></section>
+<section class="card"><h2>02 · Category</h2><div class="grid" data-group="category"><button class="selected">Male</button><button>Female</button><button>Couple</button><button>Kids</button></div></section>
+<section class="card"><h2>03 · T-shirt Colour</h2><div class="grid" data-group="colour"><button class="selected">Black</button><button>White</button></div></section>
+<section class="card"><h2>04 · Model</h2><div class="grid" data-group="model"><button class="selected">Boy</button><button>Girl</button><button>Couple</button><button>Kids Boy</button><button>Kids Girl</button></div></section>
+<section class="card"><h2>05 · Background</h2><div class="grid" data-group="background"><button class="selected">Auto AI</button><button>Studio</button><button>Nature</button><button>Modern City</button><button>Plain</button></div></section>
+<section class="card"><h2>06 · T-shirt View</h2><div class="grid" data-group="view"><button class="selected">Front + Back + Model Photos</button><button>Front View</button><button>Front + Back</button></div></section>
+<section class="card"><h2>07 · AI Generate</h2><button class="primary" id="go">Artwork + Model සකස් කරන්න</button>
+<p class="status" id="note">Design photo එක upload කරලා options තෝරන්න. Generate කළාම මුලින් artwork එක, ඉන්පසු model photo එක සකස් වෙනවා.</p></section>
+<section class="card" id="results" style="display:none"><h2>08 · Generated Results</h2><div class="resultWrap">
+<div class="resultBox"><h3>Extracted Print Artwork</h3><img id="artwork" class="result" alt="Extracted artwork"><a id="artDownload" class="download" download="tanu-print-artwork.png">Artwork Download</a></div>
+<div class="resultBox"><h3>T-shirt Model Photo</h3><img id="modelImage" class="result" alt="Model wearing T-shirt"><a id="modelDownload" class="download" download="tanu-model-photo.png">Model Photo Download</a></div>
+</div></section>
+<footer>TANU FASHION · DESIGN STUDIO · AI Build v2</footer></main>
+<script>
+const selections = {};
+document.querySelectorAll('[data-group]').forEach(group=>{
+  const key=group.dataset.group;
+  selections[key]=group.querySelector('.selected').textContent;
+  group.addEventListener('click',e=>{
+    if(e.target.tagName!=='BUTTON')return;
+    group.querySelectorAll('button').forEach(b=>b.classList.remove('selected'));
+    e.target.classList.add('selected');selections[key]=e.target.textContent;
+  });
+});
+const photo=document.getElementById('photo');
+photo.addEventListener('change',e=>{
+  const f=e.target.files[0]; if(!f)return;
+  const p=document.getElementById('preview');p.src=URL.createObjectURL(f);p.style.display='block';
+});
+function showResult(imgId,linkId,data){
+  const url='data:image/png;base64,'+data;
+  document.getElementById(imgId).src=url;
+  document.getElementById(imgId).style.display='block';
+  document.getElementById(linkId).href=url;
+}
+document.getElementById('go').onclick=async()=>{
+  const file=photo.files[0], note=document.getElementById('note'), btn=document.getElementById('go');
+  if(!file){note.textContent='මුලින් Design Photo එක upload කරන්න.';return;}
+  const form=new FormData();form.append('image',file);
+  Object.entries(selections).forEach(([k,v])=>form.append(k,v));
+  btn.disabled=true;btn.textContent='AI වැඩ කරමින්...';note.textContent='පියවර 1/2: Print artwork එක සකස් කරමින්...';
+  document.getElementById('results').style.display='none';
+  try{
+    const res=await fetch('/api/generate',{method:'POST',body:form});
+    const data=await res.json();
+    if(!res.ok)throw new Error(data.error||'AI generation අසාර්ථකයි.');
+    showResult('artwork','artDownload',data.artwork);
+    note.textContent='පියවර 2/2: Model photo එක සකස් කරමින්...';
+    showResult('modelImage','modelDownload',data.model);
+    document.getElementById('results').style.display='block';
+    note.textContent='සාර්ථකයි! Artwork සහ model photo සකස් කරලා තියෙනවා. Download කරගන්න.';
+  }catch(err){note.textContent='දෝෂයක්: '+err.message+'\nAPI Key / Billing / server setup පරීක්ෂා කරන්න.';}
+  finally{btn.disabled=false;btn.textContent='Artwork + Model සකස් කරන්න';}
+};
+if('serviceWorker' in navigator && location.protocol.startsWith('http'))navigator.serviceWorker.register('./sw.js');
+</script></body></html>
